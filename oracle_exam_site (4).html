@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prova de Oracle Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4d3c 0%, #000000 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border-radius: 20px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.6);
+            overflow: hidden;
+            border: 2px solid #0a4d3c;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0a4d3c 0%, #064d3a 100%);
+            color: #ffffff;
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #00ff88;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Tela inicial */
+        .welcome-screen {
+            padding: 60px 40px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .welcome-screen h2 {
+            color: #00ff88;
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-box {
+            background: #0a4d3c;
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 12px 0;
+            font-size: 1.1em;
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .info-box li:last-child {
+            border-bottom: none;
+        }
+
+        .info-box li strong {
+            color: #00ff88;
+        }
+
+        .name-input {
+            margin: 50px 0;
+        }
+
+        .name-input label {
+            display: block;
+            font-size: 1.4em;
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .name-input input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            border: 3px solid #0a4d3c;
+            border-radius: 10px;
+            text-align: center;
+            background: #2a2a2a;
+            color: #ffffff;
+            transition: all 0.3s;
+        }
+
+        .name-input input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #000000;
+            border: none;
+            padding: 22px 70px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 40px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tela da prova */
+        .exam-screen {
+            display: none;
+        }
+
+        .timer-bar {
+            background: #0a4d3c;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 3px solid #00ff88;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .timer-bar .time {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .timer-bar .question-time {
+            font-size: 1.3em;
+            color: #ffffff;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .timer-bar .elapsed-time {
+            font-size: 1.1em;
+            color: #00ff88;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+
+        .question-container {
+            padding: 50px;
+            min-height: 500px;
+        }
+
+        .question-box {
+            background: #2a2a2a;
+            padding: 40px;
+            border-radius: 15px;
+            border-left: 5px solid #00ff88;
+        }
+
+        .question-number {
+            color: #00ff88;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            color: #ffffff;
+            margin-bottom: 35px;
+            line-height: 1.7;
+        }
+
+        .answer-area textarea {
+            width: 100%;
+            min-height: 280px;
+            padding: 25px;
+            font-size: 1.1em;
+            border: 3px solid #0a4d3c;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            background: #1a1a1a;
+            color: #ffffff;
+            transition: all 0.3s;
+        }
+
+        .answer-area textarea:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            padding: 18px 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prev-btn {
+            background: #2a2a2a;
+            color: #ffffff;
+            border: 2px solid #0a4d3c;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #0a4d3c 0%, #064d3a 100%);
+            color: #ffffff;
+            border: 2px solid #00ff88;
+        }
+
+        .finish-btn {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #000000;
+            border: none;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Tela final */
+        .result-screen {
+            display: none;
+            padding: 60px 40px;
+            color: #ffffff;
+        }
+
+        .result-screen h2 {
+            color: #00ff88;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .result-screen p {
+            text-align: center;
+            font-size: 1.3em;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+        }
+
+        .email-box {
+            background: #0a4d3c;
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .email-box h3 {
+            color: #00ff88;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .email-box p {
+            color: #ffffff;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .email-box .email {
+            color: #00ff88;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .output-box {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+            margin-top: 30px;
+        }
+
+        .output-box pre {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 14px;
+            max-height: 500px;
+            overflow-y: auto;
+            color: #e0e0e0;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #000000;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .warning {
+            background: #0a4d3c;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            border: 2px solid #00ff88;
+        }
+
+        .time-warning {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Prova de Oracle Database</h1>
+            <p>Sistema de Avaliação Online</p>
+        </div>
+
+        <!-- TELA INICIAL -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h2>Bem-vindo à Prova de Oracle</h2>
+            
+            <div class="info-box">
+                <h3>Informações Importantes</h3>
+                <ul>
+                    <li>A prova contém <strong>20 questões</strong></li>
+                    <li>Tempo total: <strong>60 minutos</strong></li>
+                    <li>Cada questão tem <strong>3 minutos</strong> para responder</li>
+                    <li>Após 3 minutos, você será automaticamente levado para a próxima questão</li>
+                    <li><strong>Você pode voltar</strong> para questões anteriores para revisar ou completar</li>
+                    <li>O sistema registra quanto tempo você gasta em cada questão</li>
+                    <li>Ao finalizar, você receberá um arquivo com todas as suas respostas e o tempo gasto</li>
+                    <li><strong>ATENÇÃO:</strong> Depois que começar, não será possível pausar</li>
+                </ul>
+            </div>
+
+            <div class="name-input">
+                <label for="studentName">Digite seu nome completo para começar:</label>
+                <input type="text" id="studentName" placeholder="Seu nome aqui..." required>
+            </div>
+
+            <button class="start-btn" onclick="iniciarProva()">Iniciar Prova</button>
+        </div>
+
+        <!-- TELA DA PROVA -->
+        <div class="exam-screen" id="examScreen">
+            <div class="timer-bar">
+                <div class="time" id="totalTimer">60:00</div>
+                <div class="question-time" id="questionTimer">Tempo restante nesta questão: 3:00</div>
+                <div class="elapsed-time" id="elapsedTimer">Tempo gasto nesta questão: 0:00</div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-box">
+                    <div class="question-number" id="questionNumber">Questão 1 de 20</div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="answer-area">
+                        <textarea id="answerText" placeholder="Digite sua resposta aqui..."></textarea>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="nav-btn prev-btn" onclick="voltarQuestao()" id="prevBtn">Anterior</button>
+                    <button class="nav-btn next-btn" onclick="proximaQuestao()" id="nextBtn">Próxima</button>
+                    <button class="nav-btn finish-btn" onclick="finalizarProva()" id="finishBtn" style="display:none;">Finalizar Prova</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DE RESULTADO -->
+        <div class="result-screen" id="resultScreen">
+            <h2>Prova Finalizada com Sucesso</h2>
+            
+            <div class="email-box">
+                <h3>Envie suas respostas para:</h3>
+                <p>Copie o conteúdo abaixo e envie por email para</p>
+                <div class="email">leonardo.petruncko@quipux.com.br</div>
+            </div>
+            
+            <div class="output-box">
+                <pre id="outputContent"></pre>
+            </div>
+            
+            <button class="copy-btn" onclick="copiarRespostas()">Copiar Todas as Respostas</button>
+        </div>
+    </div>
+
+    <script>
+        const questoes = [
+            "Questão 1 - Entendendo o que é o AWR: O que é o AWR (Automatic Workload Repository) e para que ele serve dentro do banco de dados Oracle? Explique com suas palavras qual é a função principal dele e por que ele é importante para o DBA.",
+            "Questão 2 - O que são Snapshots?",
+            "Questão 3 - O que são Baselines: O AWR guarda alguns snapshots para comparar o desempenho de diferentes períodos. O que é uma baseline?",
+            "Questão 4 - O que são views dinâmicas? Explique com suas palavras o que são as views dinâmicas (V$ ou GV$) no Oracle. Diga para que elas servem e por que são importantes quando o DBA quer descobrir sessões lentas ou problemas de desempenho.",
+            "Questão 5 - View V$SESSION: A view V$SESSION mostra várias informações sobre o que está acontecendo nas sessões do banco. Cite duas colunas importantes dessa view e explique o que elas ajudam o DBA a identificar. (Dica: pode falar sobre LAST_CALL_ET, BLOCKING_SESSION, SQL_ID, etc.)",
+            "Questão 6 - Sessões lentas: Imagine que o banco de dados está lento e o DBA quer descobrir qual sessão está travando ou demorando demais. Explique como ele pode usar a view V$SESSION para identificar o problema e qual coluna ajuda a ver o tempo que a sessão está ativa ou inativa.",
+            "Questão 7 - O que é um índice e para que serve? Explique com suas palavras o que é um índice no banco de dados Oracle e qual é o principal benefício de usá-lo. Dê um exemplo de situação onde um índice melhora a performance de uma consulta.",
+            "Questão 8 - O que é o plano de execução? O que significa o plano de execução de uma instrução SQL? Explique com suas palavras o que o Oracle mostra nesse plano.",
+            "Questão 9 - O que é um SQL Profile e qual é o seu objetivo dentro do Oracle Database?",
+            "Questão 10 - O que é um CURSOR no Oracle?",
+            "Questão 11 - Conceito básico de Hint: O que é um hint no Oracle e para que ele serve?",
+            "Questão 12 - Sessões bloqueadas: O que é uma sessão bloqueada (locked session) no Oracle? Explique com suas palavras o que causa esse bloqueio e como o DBA pode identificar qual sessão está bloqueando outra.",
+            "Questão 13 - Diferença entre DELETE e TRUNCATE: Explique a diferença entre os comandos DELETE e TRUNCATE no Oracle. Diga quando é melhor usar cada um deles.",
+            "Questão 14 - Ver espaço em disco no linux: Qual comando no Linux você usaria para verificar o espaço em disco disponível e utilizado?",
+            "Questão 15 - O que é um Data pump? Explique com suas palavras o que é o Data Pump no Oracle e para que ele serve. Diga qual é a principal vantagem de usar o Data Pump em vez de outros métodos de exportação/importação.",
+            "Questão 16 - Paralelismo: O que faz o parâmetro PARALLEL no expdp e impdp?",
+            "Questão 17 - Comando completo: Monte um exemplo de comando completo de exportação usando expdp, com: usuário USER_EXPDP, dump DBFULL_20251006.dmp, diretório BACKUP_DIR, log DBFULL_20251006.log, e paralelismo 4.",
+            "Questão 18 - Tipos de exportação: Quais são os quatro tipos principais de exportação que o Data Pump pode fazer? Explique brevemente cada um deles.",
+            "Questão 19 - O que é um TABLESPACE no Oracle? Explique com suas palavras o que é um tablespace no banco de dados Oracle e qual é a sua função. Diga como os tablespaces ajudam a organizar os dados dentro do banco.",
+            "Questão 20 - Automação de backup com dump: O DBA quer automatizar a criação de dumps toda madrugada. Que ferramenta do Linux ele pode usar para agendar automaticamente a execução do comando expdp todos os dias às 2h da manhã?"
+        ];
+
+        let nomeAluno = '';
+        let questaoAtual = 0;
+        let respostas = new Array(20).fill('');
+        let tempoTotal = 60 * 60;
+        let tempoQuestao = 3 * 60;
+        let tempoGastoPorQuestao = new Array(20).fill(0);
+        let tempoDecorrido = 0;
+        let intervalTotal;
+        let intervalQuestao;
+        let intervalDecorrido;
+
+        function iniciarProva() {
+            nomeAluno = document.getElementById('studentName').value.trim();
+            
+            if (!nomeAluno) {
+                alert('Por favor, digite seu nome para começar!');
+                return;
+            }
+
+            if (!confirm(`Olá, ${nomeAluno}!\n\nVocê está prestes a iniciar a prova com 20 questões.\nTempo total: 60 minutos\nTempo por questão: 3 minutos\n\nATENÇÃO: Você não poderá voltar para questões anteriores após o tempo expirar!\n\nDeseja continuar?`)) {
+                return;
+            }
+
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('examScreen').style.display = 'block';
+            
+            carregarQuestao();
+            iniciarTimers();
+        }
+
+        function carregarQuestao() {
+            document.getElementById('questionNumber').textContent = `Questão ${questaoAtual + 1} de 20`;
+            document.getElementById('questionText').textContent = questoes[questaoAtual];
+            document.getElementById('answerText').value = respostas[questaoAtual];
+            
+            document.getElementById('prevBtn').disabled = questaoAtual === 0;
+            
+            if (questaoAtual === 19) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('finishBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('finishBtn').style.display = 'none';
+            }
+            
+            tempoQuestao = 3 * 60;
+            
+            // Reinicia o cronômetro da questão atual
+            clearInterval(intervalDecorrido);
+            tempoDecorrido = 0;
+            atualizarTempoDecorrido();
+            
+            // Inicia o cronômetro novamente
+            intervalDecorrido = setInterval(() => {
+                tempoDecorrido++;
+                atualizarTempoDecorrido();
+            }, 1000);
+        }
+
+        function salvarResposta() {
+            respostas[questaoAtual] = document.getElementById('answerText').value;
+        }
+
+        function proximaQuestao() {
+            salvarResposta();
+            
+            // Acumula o tempo gasto na questão atual
+            tempoGastoPorQuestao[questaoAtual] += tempoDecorrido;
+            
+            if (questaoAtual < 19) {
+                questaoAtual++;
+                carregarQuestao();
+            }
+        }
+
+        function voltarQuestao() {
+            salvarResposta();
+            
+            // Acumula o tempo gasto na questão atual
+            tempoGastoPorQuestao[questaoAtual] += tempoDecorrido;
+            
+            if (questaoAtual > 0) {
+                questaoAtual--;
+                carregarQuestao();
+            }
+        }
+
+        function atualizarTempoDecorrido() {
+            const minutos = Math.floor(tempoDecorrido / 60);
+            const segundos = tempoDecorrido % 60;
+            document.getElementById('elapsedTimer').textContent = 
+                `Tempo gasto nesta questão: ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        }
+
+        function iniciarTimers() {
+            intervalTotal = setInterval(() => {
+                tempoTotal--;
+                const minutos = Math.floor(tempoTotal / 60);
+                const segundos = tempoTotal % 60;
+                document.getElementById('totalTimer').textContent = 
+                    `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+                
+                if (tempoTotal <= 0) {
+                    finalizarProva();
+                }
+
+                if (tempoTotal <= 5 * 60) {
+                    document.getElementById('totalTimer').classList.add('time-warning');
+                }
+            }, 1000);
+
+            intervalQuestao = setInterval(() => {
+                tempoQuestao--;
+                const minutos = Math.floor(tempoQuestao / 60);
+                const segundos = tempoQuestao % 60;
+                document.getElementById('questionTimer').textContent = 
+                    `Tempo nesta questão: ${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+                
+                if (tempoQuestao <= 30) {
+                    document.getElementById('questionTimer').classList.add('time-warning');
+                } else {
+                    document.getElementById('questionTimer').classList.remove('time-warning');
+                }
+
+                if (tempoQuestao <= 0) {
+                    // Bloqueia a questão atual
+                    questoesLiberadas[questaoAtual] = false;
+                    
+                    if (questaoAtual < 19) {
+                        proximaQuestao();
+                    } else {
+                        finalizarProva();
+                    }
+                }
+            }, 1000);
+        }
+
+        function finalizarProva() {
+            salvarResposta();
+            tempoGastoPorQuestao[questaoAtual] = tempoDecorrido;
+            clearInterval(intervalTotal);
+            clearInterval(intervalQuestao);
+            clearInterval(intervalDecorrido);
+
+            let output = `====================================
+PROVA DE ORACLE DATABASE
+====================================
+
+Nome: ${nomeAluno}
+Data/Hora: ${new Date().toLocaleString('pt-BR')}
+Tempo utilizado: ${formatarTempo(60 * 60 - tempoTotal)}
+
+====================================
+
+`;
+
+            for (let i = 0; i < 20; i++) {
+                output += `QUESTÃO ${i + 1}:\n${questoes[i]}\n\nRESPOSTA:\n${respostas[i] || '[NÃO RESPONDIDA]'}\n\nTEMPO GASTO NESTA QUESTÃO: ${formatarTempo(tempoGastoPorQuestao[i])}\n\n${'='.repeat(40)}\n\n`;
+            }
+
+            document.getElementById('outputContent').textContent = output;
+            document.getElementById('examScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+        }
+
+        function formatarTempo(segundos) {
+            const min = Math.floor(segundos / 60);
+            const seg = segundos % 60;
+            return `${min} minutos e ${seg} segundos`;
+        }
+
+        function copiarRespostas() {
+            const texto = document.getElementById('outputContent').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('Respostas copiadas com sucesso!\n\nAgora cole em um arquivo .txt e salve.');
+            });
+        }
+
+        window.addEventListener('beforeunload', (e) => {
+            if (document.getElementById('examScreen').style.display === 'block') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
